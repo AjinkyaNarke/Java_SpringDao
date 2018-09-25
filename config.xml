@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:tx="http://www.springframework.org/schema/tx"
+ xmlns:aop="http://www.springframework.org/schema/aop"
+
+ xmlns:context="http://www.springframework.org/schema/context"
+ xmlns:p="http://www.springframework.org/schema/p"
+
+
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="
+ http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans.xsd
+
+ http://www.springframework.org/schema/context
+ http://www.springframework.org/schema/context/spring-context.xsd
+
+ http://www.springframework.org/schema/aop
+ http://www.springframework.org/schema/aop/spring-aop.xsd
+
+ http://www.springframework.org/schema/tx
+ http://www.springframework.org/schema/tx/spring-tx.xsd
+ ">
+ 
+<!-- Activate Annotations (StereoType) -->
+<context:component-scan base-package="com.app"/>
+<!-- Activate Tx Manager -->
+<tx:annotation-driven/>
+<!-- Link Properties File -->
+<context:property-placeholder location="app.properties"/>
+<!-- 1 Data Source Object -->
+
+<bean
+class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+ name="dsObj"
+ p:driverClassName="${dc}"
+ p:url="${url}"
+ p:username="${un}"
+ p:password="${pwd}"
+/>
+<!-- 2 SessionFactory Object -->
+<bean
+class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
+name="sfObj">
+<property name="dataSource" ref="dsObj"/>
+<property name="hibernateProperties">
+<props>
+<prop key="hibernate.dialect">${dialect}</prop>
+<prop key="hibernate.show_sql">${showsql}</prop>
+<prop key="hibernate.format_sql">${formatsql}</prop>
+<prop
+key="hibernate.hbm2ddl.auto">${ddlauto}</prop>
+</props>
+</property>
+<property name="annotatedClasses">
+<list>
+<value>com.app.model.User</value>
+</list>
+</property>
+</bean>
+<!-- 3. Hibernate template object -->
+<bean class="org.springframework.orm.hibernate5.HibernateTemplate"
+name="htObj">
+<property name="sessionFactory" ref="sfObj"/>
+</bean>
+<!-- 4 Tx Manager Object -->
+
+ <bean
+class="org.springframework.orm.hibernate5.HibernateTransactionManager"
+name="transactionManager">
+<property name="sessionFactory" ref="sfObj"/>
+</bean>
+
+
+<bean id="dobj" class="com.app.dao.impl.UserDaoImpl">
+	<property name="htm" ref="htObj"></property>
+	</bean>
+	
+	
+	<bean id="ser" class="com.app.service.impl.UserServiceImpl">
+		<property name="dao" ref="dobj"></property>
+	</bean>
+
+
+</beans>
